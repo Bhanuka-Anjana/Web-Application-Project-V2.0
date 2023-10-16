@@ -1,3 +1,5 @@
+require("dotenv").config();
+const jwt = require("jsonwebtoken");
 const { User, validate } = require("../models/user");
 const express = require("express");
 const router = express.Router();
@@ -34,8 +36,9 @@ router.post("/", async (req, res) => {
 
   user = await user.save();
 
+  const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET_KEY);
   //send user obj without password
-  res.send(
+  res.header("x-auth-token",token).send(
     _.pick(user, [
       "_id",
       "firstName",

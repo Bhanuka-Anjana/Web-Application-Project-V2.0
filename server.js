@@ -9,6 +9,7 @@ const categories = require('./routes/categories');
 const app = express();
 
 if(!process.env.JWT_SECRET_KEY){
+    //terminate server because jwt is not defined
     process.exit(1);
 }
 
