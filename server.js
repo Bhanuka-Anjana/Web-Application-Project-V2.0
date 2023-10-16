@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const products = require('./routes/products');
+const users = require('./routes/users');
 const app = express();
 
 app.use(express.json());
@@ -13,5 +14,6 @@ app.get('/',(req,res)=>{
     res.send("Hello world"); 
 })
 app.use('/api/products', products);
+app.use('/api/users', users);
 
 app.listen(3000,()=>{console.log("server is starting")});
