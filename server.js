@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const products = require('./routes/products');
@@ -7,9 +8,13 @@ const auth = require('./routes/auth');
 const categories = require('./routes/categories');
 const app = express();
 
+if(!process.env.JWT_SECRET_KEY){
+    process.exit(1);
+}
+
 app.use(express.json());
 
-mongoose.connect('mongodb://127.0.0.1:27017/shopDB')
+mongoose.connect(process.env.DB_HOST)
     .then(()=>{console.log("connected to the database")})
     .catch(()=>{console.log('database not connected');});
 
@@ -22,4 +27,4 @@ app.use('/api/categories', categories);
 app.use('/api/orders', orders);
 app.use('/api/auth', auth);
 
-app.listen(3000,()=>{console.log("server is starting")});
+app.listen(process.env.PORT,()=>{console.log("server is starting")});
