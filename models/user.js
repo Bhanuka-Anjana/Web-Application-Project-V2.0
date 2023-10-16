@@ -1,3 +1,5 @@
+require("dotenv").config();
+const jwt = require("jsonwebtoken");
 const Joi = require("joi");
 const mongoose = require("mongoose");
 
@@ -49,7 +51,7 @@ const userSchema = new mongoose.Schema({
   },
   isAdmin: {
     type: Boolean,
-    default: false
+    default: false,
   },
 });
 
@@ -68,6 +70,11 @@ function validateUser(user) {
 
   return Joi.validate(user, schema);
 }
+
+userSchema.methods.generateJWT = function () {
+  const token = jwt.sign({ _id: this._id }, process.env.JWT_SECRET_KEY);
+  return token;
+};
 
 exports.User = User;
 exports.validate = validateUser;

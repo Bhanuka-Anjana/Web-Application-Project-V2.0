@@ -36,7 +36,7 @@ router.post("/", async (req, res) => {
 
   user = await user.save();
 
-  const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET_KEY);
+  const token = user.generateJWT();
   //send user obj without password
   res.header("x-auth-token",token).send(
     _.pick(user, [
