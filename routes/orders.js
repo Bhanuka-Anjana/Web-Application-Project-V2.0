@@ -1,17 +1,16 @@
+const auth = require("../middleware/auth");
 const { Order, validate } = require("../models/order");
 const { Product } = require("../models/product");
 const { User } = require("../models/user");
 const express = require("express");
 const router = express.Router();
 
-router.get("/", async (req, res) => {
-  const orders = await Order.find()
-    .select("-__v")
-    .sort("-dateOut");
+router.get("/", auth, async (req, res) => {
+  const orders = await Order.find().select("-__v").sort("-dateOut");
   res.send(orders);
 });
 
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
@@ -28,15 +27,15 @@ router.post("/", async (req, res) => {
     user: {
       _id: user._id,
       firstName: user.firstName,
-      contactNumber: user.contactNumber
+      contactNumber: user.contactNumber,
     },
     product: {
       _id: product._id,
       productName: product.productName,
-      unitPrice: product.unitPrice
+      unitPrice: product.unitPrice,
     },
-    quantity : req.body.quantity,
-    totalCost: product.unitPrice*req.body.quantity
+    quantity: req.body.quantity,
+    totalCost: product.unitPrice * req.body.quantity,
   });
 
   order = await order.save();
@@ -44,10 +43,9 @@ router.post("/", async (req, res) => {
   product.save();
 
   res.send(order);
-
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
   const order = await Order.findById(req.params.id).select("-__v");
 
   if (!order)

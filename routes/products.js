@@ -2,8 +2,9 @@ const express = require('express');
 const mongoose = require('mongoose');
 const router=express.Router();
 const { Product, validate } = require('../models/product');
+const auth = require('../middleware/auth');
 
-router.get('/', async (req, res) =>{
+router.get('/',auth, async (req, res) =>{
     const products = await Product
         .find()
         .sort('name')
@@ -11,7 +12,7 @@ router.get('/', async (req, res) =>{
     res.send(products);
 })
 
-router.get('/:id', async (req, res) => {
+router.get('/:id',auth, async (req, res) => {
 
     const product = await Product
         .find({_id:req.params.id});
@@ -22,7 +23,7 @@ router.get('/:id', async (req, res) => {
 
 })
 
-router.post('/',async (req, res) => {
+router.post('/',auth,async (req, res) => {
     const { error } = validate(req.body);
 
     if (error) return res.status(400).send(error.details[0].message);
@@ -38,7 +39,7 @@ router.post('/',async (req, res) => {
     res.send(product);
 })
 
-router.put('/:id', async (req, res)=>{
+router.put('/:id',auth, async (req, res)=>{
 
     const { error } = validate(req.body);
 
@@ -58,7 +59,7 @@ router.put('/:id', async (req, res)=>{
 
 })
 
-router.delete('/:id', async (req, res)=>{
+router.delete('/:id',auth, async (req, res)=>{
     const product = await Product.findByIdAndRemove(req.params.id);
 
     if (!product) res.status(404).send("No product found for that ID...");
