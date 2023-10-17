@@ -4,7 +4,7 @@ const router=express.Router();
 const { Product, validate } = require('../models/product');
 const auth = require('../middleware/auth');
 
-router.get('/',auth, async (req, res) =>{
+router.get('/', async (req, res) =>{
     const products = await Product
         .find()
         .sort('name')
