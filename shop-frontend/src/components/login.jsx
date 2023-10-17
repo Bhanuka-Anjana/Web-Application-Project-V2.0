@@ -2,7 +2,6 @@ import React from "react";
 import Joi from "joi-browser";
 import loginBg from "../images/traditional-food-feat.jpg";
 import shoplabel from "../images/shop-label.png";
-import Input from "./common/input";
 import Form from "./common/form";
 
 class LoginForm extends Form {
@@ -24,7 +23,6 @@ class LoginForm extends Form {
   };
 
   render() {
-    const { data, errors } = this.state;
     return (
       <div className="container-fluid px-0">
         <div className="row g-0">
@@ -35,28 +33,9 @@ class LoginForm extends Form {
           </div>
           <div className="col-lg-5 vh-100 ">
             <form onSubmit={this.handleSubmit}>
-              <Input
-                name="email"
-                value={data.email}
-                label="Email"
-                onChange={this.handleChange}
-                error={errors.email}
-              />
-              <Input
-                name="password"
-                value={data.password}
-                label="Password"
-                onChange={this.handleChange}
-                error={errors.password}
-              />
-
-              <button
-                disabled={this.validate()}
-                type="submit"
-                class="btn btn-primary px-4"
-              >
-                Login
-              </button>
+              {this.renderInput('email',"Email")}
+              {this.renderInput('password',"Password",'password')}
+              {this.renderButton("Login")}
             </form>
           </div>
         </div>
