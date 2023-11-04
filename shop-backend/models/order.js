@@ -1,5 +1,5 @@
 const Joi = require("joi");
-Joi.objectId = require('joi-objectid')(Joi);
+Joi.objectId = require("joi-objectid")(Joi);
 const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema({
@@ -34,15 +34,15 @@ const orderSchema = new mongoose.Schema({
         required: true,
         min: 0,
         max: 1000,
-      }
+      },
     }),
     required: true,
   },
   quantity: {
-    type : Number,
-    required : true,
-    min : 1,
-    max : 50
+    type: Number,
+    required: true,
+    min: 1,
+    max: 50,
   },
   createDate: {
     type: Date,
@@ -58,13 +58,13 @@ const orderSchema = new mongoose.Schema({
 const Order = mongoose.model("Order", orderSchema);
 
 function validateOrder(order) {
-  const schema = {
+  const schema = Joi.object({
     userId: Joi.objectId().required(),
     productId: Joi.objectId().required(),
-    quantity: Joi.number().positive().greater(0).required()
-  };
+    quantity: Joi.number().positive().greater(0).required(),
+  });
 
-  return Joi.validate(order, schema);
+  return schema.validate(order);
 }
 
 exports.Order = Order;

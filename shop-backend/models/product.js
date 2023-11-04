@@ -22,8 +22,8 @@ const productSchema = new mongoose.Schema({
     min: 0,
     max: 1000,
   },
-  category: { 
-    type: categorySchema,  
+  categoryId: { 
+    type: String,  
     required: true
   },
 });

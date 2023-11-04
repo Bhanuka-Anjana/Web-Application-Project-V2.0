@@ -1,70 +1,70 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const router=express.Router();
-const { Product, validate } = require('../models/product');
-const auth = require('../middleware/auth');
+const express = require("express");
+const mongoose = require("mongoose");
+const router = express.Router();
+const { Product, validate } = require("../models/product");
+const auth = require("../middleware/auth");
+const admin = require("../middleware/admin");
 
-router.get('/', async (req, res) =>{
-    const products = await Product
-        .find()
-        .sort('name')
+router.get("/", auth, async (req, res) => {
+  const products = await Product.find();
+  res.send(products);
+});
 
-    res.send(products);
-})
+router.get("/:id", [auth, admin], async (req, res) => {
+  const product = await Product.find({ _id: req.params.id });
 
-router.get('/:id',auth, async (req, res) => {
+  if (!product) {
+    res.status(404).send({ message: "No product found for that ID..." });
+  }
 
-    const product = await Product
-        .find({_id:req.params.id});
+  res.send(product);
+});
 
-    if (!product) res.status(404).send("No product found for that ID...");
+router.post("/", [auth, admin], async (req, res) => {
+  const { error } = validate(req.body);
+  if (error) return res.status(400).send({ message: error.details[0].message });
 
-    res.send(product);
+  const product = new Product({
+    productName: req.body.productName,
+    numberInStock: req.body.numberInStock,
+    unitPrice: req.body.unitPrice,
+    categoryId: req.body.categoryId,
+  });
 
-})
+  await product.save();
 
-router.post('/',auth,async (req, res) => {
-    const { error } = validate(req.body);
+  res.send(product);
+});
 
-    if (error) return res.status(400).send(error.details[0].message);
+router.put("/:id", [auth, admin], async (req, res) => {
+  const { error } = validate(req.body);
 
-    const product = new Product({
-        productName : req.body.productName,
-        numberInStock : req.body.numberInStock,
-        unitPrice : req.body.unitPrice
-    });
+  if (error) return res.status(400).send({ message: error.details[0].message });
 
-    await product.save();
+  let product = await Product.findByIdAndUpdate(
+    req.params.id,
+    {
+      $set: {
+        productName: req.body.productName,
+        numberInStock: req.body.numberInStock,
+        unitPrice: req.body.unitPrice,
+      },
+    },
+    { new: true }
+  );
 
-    res.send(product);
-})
+  if (!product)
+    return res.status(404).send({ message: "No product found for that ID..." });
 
-router.put('/:id',auth, async (req, res)=>{
+  res.send(product);
+});
 
-    const { error } = validate(req.body);
+router.delete("/:id", [auth, admin], async (req, res) => {
+  const product = await Product.findByIdAndRemove(req.params.id);
 
-    if (error) return res.status(400).send(error.details[0].message);
+  if (!product) res.status(404).send("No product found for that ID...");
 
-    let product = await Product.findByIdAndUpdate(req.params.id,{
-        $set:{
-            productName:req.body.productName,
-            numberInStock:req.body.numberInStock,
-            unitPrice:req.body.unitPrice
-        }
-    }, {new:true})
-
-    if (!product) return res.status(404).send("No product found for that ID...");
-
-    res.send(product);
-
-})
-
-router.delete('/:id',auth, async (req, res)=>{
-    const product = await Product.findByIdAndRemove(req.params.id);
-
-    if (!product) res.status(404).send("No product found for that ID...");
-
-    res.send(product);
-})
+  res.send(product);
+});
 
 module.exports = router;

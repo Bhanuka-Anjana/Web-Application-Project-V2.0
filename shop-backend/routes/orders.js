@@ -5,12 +5,13 @@ const { User } = require("../models/user");
 const express = require("express");
 const router = express.Router();
 
-router.get("/", auth, async (req, res) => {
+router.get("/",auth, async (req, res) => {
   const orders = await Order.find().select("-__v").sort("-dateOut");
   res.send(orders);
 });
 
-router.post("/", auth, async (req, res) => {
+router.post("/",auth, async (req, res) => {
+  console.log(req.body);
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
@@ -45,7 +46,7 @@ router.post("/", auth, async (req, res) => {
   res.send(order);
 });
 
-router.get("/:id", auth, async (req, res) => {
+router.get("/:id",auth, async (req, res) => {
   const order = await Order.findById(req.params.id).select("-__v");
 
   if (!order)

@@ -2,8 +2,8 @@ import http from "./httpService";
 
 const apiEndpoint = "http://localhost:8080/api/products";
 
-export function getProducts() {
-  return http.get(apiEndpoint);
+export async function getProducts() {
+  return await http.get(apiEndpoint);
 }
 
 export function getProduct(productId) {

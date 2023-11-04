@@ -1,32 +1,59 @@
 require("dotenv").config();
-const jwt = require("jsonwebtoken");
-const { User } = require("../models/user");
+const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const bcrypt = require("bcrypt");
-const _ = require("lodash");
+const auth = require("../middleware/auth");
 
-router.post("/", async (req, res) => {
-  const { error } = validate(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
-
-  let user = await User.findOne({ email: req.body.email });
-  if (!user) return res.status(400).send("Invalid Email or Password");
-
-  const conformation = await bcrypt.compare(req.body.password, user.password);
-  if (!conformation) return res.status(400).send("Invalid Email or Password");
-
-  const token = user.generateJWT();
-  res.send(token);
+router.get("/me", (req, res) => {
+  if (req.isAuthenticated()) {
+    console.log(req.user.email);
+    res.status(200).send(req.user);
+  } else {
+    res.status(401).send(null);
+  }
 });
 
-function validate(user) {
-  const schema = {
-    email: Joi.string().min(5).max(255).required().email(),
-    password: Joi.string().min(5).max(255).required(),
-  };
+router.post("/logout", (req, res) => {
+  // Destroy the session
+  req.logout();
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Session destruction failed:", err);
+      return res.status(500).send("Logout failed");
+    }
+    // Clear the session cookie
+    res.clearCookie("connect.sid"); 
+    res.status(200).send("Logout successful");
+  });
+});
 
-  return Joi.validate(user, schema);
-}
+router.post("/local", (req, res) => {
+  passport.authenticate("local", (err, user, info) => {
+    if (err || !user) {
+      return res.status(401).send(info);
+    }
+    req.login(user, (loginErr) => {
+      if (loginErr) {
+        return res.status(401).send(loginErr);
+      }
+      res.status(200).send(user);
+    });
+  })(req, res);
+});
+
+router.get("/google/callback", passport.authenticate("google"), (req, res) => {
+  console.log(req.user);
+  res.status(200).send("OK");
+});
+router.get(
+  "/google",
+  passport.authenticate("google"),
+  (req, res) => {
+    res.status(200).send("OK");
+  },
+  (req, res) => {
+    console.log(req, res);
+  }
+);
 
 module.exports = router;

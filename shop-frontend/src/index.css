@@ -5,6 +5,7 @@
 }
 .thumbnail {
     position: relative;
+    width: 100hv;
 }
 
 .caption {
@@ -21,3 +22,6 @@
     left: 0;
     width: 100%;
 }
+.underline-text {
+    text-decoration: underline;
+  }
