@@ -1,25 +1,20 @@
 import axios from "axios";
-import { toast } from "react-toastify";
 
-// Add a response interceptor
-axios.interceptors.response.use(
-  (response) => {
-    toast.success(response.data["message"]);
-    return response;
+const HTTP = axios.create({
+  baseURL: "http://localhost:8080/api",
+  withCredentials: true,
+  headers: {
+    "Content-type": "application/json",
   },
-  (error) => {
-    //alert("hellow");
-    //console.log(error.response.data["message"]);
-    if(error.response.data) return toast.error(error.response.data["message"]);
-    //return Promise.reject(error);
+  timeout: 5000,
+});
+
+HTTP.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = token;
   }
-);
+  return config;
+});
 
-axios.defaults.withCredentials = true;
-
-export default {
-  get: axios.get,
-  post: axios.post,
-  put: axios.put,
-  delete: axios.delete
-};
+export default HTTP;

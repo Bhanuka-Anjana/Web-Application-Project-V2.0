@@ -1,25 +1,31 @@
-import http from "./httpService";
-
-const apiEndpoint = "http://localhost:8080/api/products";
+import HTTP from "./httpService";
 
 export async function getProducts() {
-  return await http.get(apiEndpoint);
+  return await HTTP.get("/products");
 }
 
-export function getProduct(productId) {
-  return http.get(`${apiEndpoint}/${productId}`);
+export async function getProduct(productId) {
+  const response = await HTTP.get(`/products/?id=${productId}`);
+  return response;
 }
 
-export function saveProduct(product) {
-  if (product._id) {
-    const body = { ...product };
-    delete body._id;
-    return http.put(`${apiEndpoint}/${product._id}`, body);
-  }
-
-  return http.post(apiEndpoint, product);
+export async function saveProduct(product) {
+  const response = await HTTP.post("/products", product);
+  return response;
 }
 
-export function deleteProduct(productId) {
-  return http.delete(`${apiEndpoint}/${productId}`);
+export async function deleteProduct(productId) {
+  const response = await HTTP.delete(`/products/?id=${productId}`);
+  return response;
+}
+
+export async function updateProduct(product) {
+  const body = {
+    productName: product.productName,
+    unitPrice: product.unitPrice,
+    numberInStock: product.numberInStock,
+    categoryId: product.categoryId,
+  };
+  const response = await HTTP.put(`/products/?id=${product._id}`, body);
+  return response;
 }

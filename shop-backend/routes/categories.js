@@ -1,28 +1,34 @@
-const auth = require("../middleware/auth");
-const admin = require("../middleware/admin");
 const { Category, validate } = require("../models/category");
 const express = require("express");
 const router = express.Router();
+const admin = require("../middleware/admin");
+const auth = require("../middleware/auth");
 
-router.get("/",auth, async (req, res) => {
+router.get("/",[auth], async (req, res) => {
   const categories = await Category.find();
   res.send(categories);
 });
 
-router.post("/", [auth, admin], async (req, res) => {
+// Create a new category
+router.post("/", [auth,admin], async (req, res) => {
+  // Validate the request body
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
+  // Create a new category
   let category = new Category({ name: req.body.name });
   category = await category.save();
 
-  res.send(category);
+  res.status(201).send(category);
 });
 
-router.put("/:id", [auth, admin], async (req, res) => {
+// Update a category
+router.put("/:id", [auth,admin], async (req, res) => {
+  // Validate the request body
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
+  // Update the category
   const category = await Category.findByIdAndUpdate(
     req.params.id,
     { name: req.body.name },
@@ -36,10 +42,12 @@ router.put("/:id", [auth, admin], async (req, res) => {
       .status(404)
       .send("The category with the given ID was not found.");
 
-  res.send(category);
+  res.status(200).send(category);
 });
 
-router.delete("/:id", [auth, admin], async (req, res) => {
+// Delete a category
+router.delete("/:id", [auth,admin], async (req, res) => {
+  // Delete the category
   const category = await Category.findByIdAndRemove(req.params.id);
 
   if (!category)
@@ -47,10 +55,11 @@ router.delete("/:id", [auth, admin], async (req, res) => {
       .status(404)
       .send("The category with the given ID was not found.");
 
-  res.send(category);
+  res.status(200).send();
 });
 
-router.get("/:id", [auth, admin], async (req, res) => {
+// Get a single category by ID
+router.get("/:id", [auth,admin], async (req, res) => {
   const category = await Category.findById(req.params.id).select("-__v");
 
   if (!category)
@@ -58,7 +67,7 @@ router.get("/:id", [auth, admin], async (req, res) => {
       .status(404)
       .send("The category with the given ID was not found.");
 
-  res.send(category);
+  res.status(200).send(category);
 });
 
 module.exports = router;

@@ -42,13 +42,8 @@ const userSchema = new mongoose.Schema({
   googleId: {
     type: String,
     unique: true,
-    default:"",
   },
 });
-
-userSchema.methods.checkPassword = async function (inputPassword) {
-  return await bcrypt.compare(inputPassword, this.password);
-};
 
 userSchema.methods.getDetails = function () {
   return _.pick(this, [
@@ -75,10 +70,10 @@ function validateUser(user) {
     firstName: Joi.string().min(2).max(50).required(),
     lastName: Joi.string().min(2).max(50),
     email: Joi.string().min(5).max(255).required().email(),
-    imgURL: Joi.string().min(5).max(1024).required(),
-    password: Joi.string().min(5).max(1024),
+    imgURL: Joi.string().min(5).max(1024),
     isAdmin: Joi.boolean().default(false),
-    googleId: Joi.string().default(""),
+    password: Joi.string().max(1024),
+    googleId: Joi.string().empty(""),
   });
 
   return schema.validate(user);

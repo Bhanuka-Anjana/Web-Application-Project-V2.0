@@ -1,37 +1,36 @@
+import HTTP from "./httpService";
 
-import http from "./httpService";
-
-const apiEndpoint = "http://localhost:8080/api/users";
+const apiEndpoint = "/users";
 
 export async function registerUser(user) {
-  return await http.post(apiEndpoint, {
+  const response = await HTTP.post(apiEndpoint, {
     firstName: user.firstName,
     lastName: user.lastName,
-    imgURL: user.imgURL,
     email: user.email,
     password: user.password,
+    imgURL: "https://via.placeholder.com/150",
+    googleId: "",
   });
+  return response;
 }
 export async function getUsers() {
-  return await http.get(apiEndpoint);
+  const response = await HTTP.get(apiEndpoint);
+  return response;
 }
 export function getUser(userId) {
-  return http.get(`${apiEndpoint}/${userId}`, {
-    "Content-Type": "application/json",
-    "x-auth-token": ``,
-  });
+  return HTTP.get(`${apiEndpoint}/${userId}`);
 }
 export function deleteUser(userId) {
-  return http.delete(`${apiEndpoint}/${userId}`, {
-    "Content-Type": "application/json",
-    "x-auth-token": ``,
-  });
+  return HTTP.delete(`${apiEndpoint}/${userId}`);
 }
-export function saveUser(user) {
-  if (user._id) {
-    const body = { ...user };
-    delete body._id;
-    return http.put(`${apiEndpoint}/${user._id}`, body);
-  }
 
-  return http.post(apiEndpoint, user);}
+export async function updateUser(userId, user) {
+  const response = await HTTP.put(`${apiEndpoint}/${userId}`, {
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+    imgURL: "https://via.placeholder.com/150",
+    googleId: user.email,
+  });
+  return response;
+}

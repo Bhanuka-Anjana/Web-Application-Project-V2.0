@@ -1,59 +1,80 @@
 require("dotenv").config();
-const passport = require("passport");
 const express = require("express");
 const router = express.Router();
+const { User } = require("../models/user");
+const bcrypt = require("bcrypt");
+const _ = require("lodash");
+const jwt = require("jsonwebtoken");
 const auth = require("../middleware/auth");
 
-router.get("/me", (req, res) => {
-  if (req.isAuthenticated()) {
-    console.log(req.user.email);
-    res.status(200).send(req.user);
-  } else {
-    res.status(401).send(null);
-  }
-});
-
-router.post("/logout", (req, res) => {
-  // Destroy the session
-  req.logout();
-  req.session.destroy((err) => {
-    if (err) {
-      console.error("Session destruction failed:", err);
-      return res.status(500).send("Logout failed");
-    }
-    // Clear the session cookie
-    res.clearCookie("connect.sid"); 
-    res.status(200).send("Logout successful");
-  });
-});
-
-router.post("/local", (req, res) => {
-  passport.authenticate("local", (err, user, info) => {
-    if (err || !user) {
-      return res.status(401).send(info);
-    }
-    req.login(user, (loginErr) => {
-      if (loginErr) {
-        return res.status(401).send(loginErr);
-      }
-      res.status(200).send(user);
+router.get("/me", auth, (req, res) => {
+  //get user from db
+  User.findById(req.user._id)
+    .then((user) => {
+      //send response
+      res.send(
+        _.pick(user, [
+          "_id",
+          "firstName",
+          "lastName",
+          "email",
+          "imgURL",
+          "isAdmin",
+        ])
+      );
+    })
+    .catch((err) => {
+      res.status(400).send(err);
     });
-  })(req, res);
 });
 
-router.get("/google/callback", passport.authenticate("google"), (req, res) => {
+//user login
+router.post("/login", async (req, res) => {
+  //seperate email and password from req.body
+  const { email, password } = req.body;
+
+  //check if email and password are provided
+  if (!email || !password) {
+    return res.status(400).send({ message: "Email and Password are required" });
+  }
+
+  //check if user exists
+  const user = await User.findOne({ email: email });
+  if (!user) {
+    return res.status(400).send({ message: "Invalid Email or Password" });
+  }
+  //check if password is correct
+  const response = await bcrypt.compareSync(password, user.password);
+  if (!response) {
+    return res.status(400).send({ message: "Invalid Email or Password" });
+  }
+
+  //generate token
+  const token = jwt.sign(
+    { _id: user._id, isAdmin: user.isAdmin },
+    process.env.JWT_SECRET_KEY,
+    { expiresIn: "1d" }
+  );
+
+  //send response with token
+  res
+    .header("Authorization", token)
+    .status(200)
+    .send(
+      _.pick(user, [
+        "_id",
+        "firstName",
+        "lastName",
+        "email",
+        "imgURL",
+        "isAdmin",
+      ])
+    );
+});
+
+router.get("/google/callback", (req, res) => {
   console.log(req.user);
   res.status(200).send("OK");
 });
-router.get(
-  "/google",
-  passport.authenticate("google"),
-  (req, res) => {
-    res.status(200).send("OK");
-  },
-  (req, res) => {
-    console.log(req, res);
-  }
-);
 
 module.exports = router;

@@ -1,62 +1,147 @@
-import React, { Component } from "react";
-import { Link, NavLink } from "react-router-dom";
-import {getCurrentUser} from "../services/authService";
+import React, { useEffect } from "react";
+import { useSelector } from "react-redux";
+import Container from "react-bootstrap/Container";
+import Nav from "react-bootstrap/Nav";
+import Navbar from "react-bootstrap/Navbar";
+import Form from "react-bootstrap/Form";
+import Button from "react-bootstrap/Button";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { fetchUserData } from "../features/authentication/authSlice";
+import Badge from "react-bootstrap/Badge";
+import { setSearchItem } from "../features/common/commonSlice";
 
-class NavBar extends Component {
-  state = { user: null };
+export default function NavBar() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const isUserLoggedIn = useSelector((state) => state.auth.isAuthenticated);
+  const user = useSelector((state) => state.auth.data);
+  const cart = useSelector((state) => state.cart.data);
 
-  async componentDidMount() {
-    const {data:user} = await getCurrentUser();
-    user? this.setState({user}): this.setState({user:null})
-  }
-  render() {
-    const { user } = this.state;
-    return (
-      <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-        <Link className="navbar-brand px-5" to="/">
-          Cafeteria
-        </Link>
-        <button
-          className="navbar-toggler"
-          type="button"
-          data-toggle="collapse"
-          data-target="#navbarNavAltMarkup"
-          aria-controls="navbarNavAltMarkup"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
+  //if token is available in the local storage, then the user is logged in
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      //dispatch the fetchUserData action
+      dispatch(fetchUserData());
+    }
+  }, []);
+
+  return (
+    <Navbar bg="dark" sticky="top" data-bs-theme="dark">
+      <Container>
+        <Navbar.Brand
+          onClick={() => {
+            navigate("/");
+          }}
         >
-          <span className="navbar-toggler-icon" />
-        </button>
-        <div className="collapse navbar-collapse" id="navbarNavAltMarkup">
-          <div className="navbar-nav">
-            {user && user.isAdmin && (
-              <>
-                <NavLink className="nav-item nav-link" to="/products">
-                  Products
-                </NavLink>
-                <NavLink className="nav-item nav-link" to="/users">
-                  Customers
-                </NavLink>
-              </>
-            )}
-            <NavLink className="nav-item nav-link" to="/orders">
+          Cafeteria
+        </Navbar.Brand>
+        {isUserLoggedIn && (
+          <Nav>
+            <Nav.Link
+              onClick={() => {
+                navigate("/products");
+              }}
+            >
+              Products
+            </Nav.Link>
+            <Nav.Link
+              onClick={() => {
+                navigate("/orders");
+              }}
+            >
               Orders
-            </NavLink>
-            {user && (
-              <>
-                <NavLink className="nav-item nav-link" to="/profile">
-                  {user.firstName}
-                </NavLink>
-                <NavLink className="nav-item nav-link" to="/logout">
-                  Logout
-                </NavLink>
-              </>
+            </Nav.Link>
+            {user.isAdmin && (
+              <Nav>
+                <Nav.Link
+                  onClick={() => {
+                    navigate("/categories");
+                  }}
+                >
+                  Categories
+                </Nav.Link>
+                <Nav.Link
+                  onClick={() => {
+                    navigate("/users");
+                  }}
+                >
+                  Users
+                </Nav.Link>
+              </Nav>
             )}
-          </div>
-        </div>
-      </nav>
-    );
-  }
+          </Nav>
+        )}
+        <Form inline>
+          <Row>
+            <Col xs="auto">
+              <Form.Control
+                type="text"
+                placeholder="Search"
+                className=" mr-sm-2"
+                onChange={(e) => {
+                  dispatch(setSearchItem(e.target.value));
+                }}
+              />
+            </Col>
+            <Col xs="auto">
+              <Button
+                variant="primary"
+                onClick={() => {
+                  navigate("/cart");
+                }}
+              >
+                Cart <Badge bg="secondary">{cart.length}</Badge>
+              </Button>
+            </Col>
+            <Col className="mx-5" xs="auto">
+              {isUserLoggedIn ? (
+                <Navbar.Text
+                  onClick={() => {
+                    navigate("/profile");
+                  }}
+                >
+                  Signed in as: <a>{user.firstName}</a>
+                </Navbar.Text>
+              ) : (
+                <Nav>
+                  <Nav.Link
+                    onClick={() => {
+                      navigate("/login");
+                    }}
+                  >
+                    Login
+                  </Nav.Link>
+                  <Nav.Link
+                    onClick={() => {
+                      navigate("/register");
+                    }}
+                  >
+                    Signup
+                  </Nav.Link>
+                </Nav>
+              )}
+            </Col>
+            <Col xs="auto">
+              {isUserLoggedIn && (
+                <Nav>
+                  <Nav.Link
+                    href="/"
+                    onClick={() => {
+                      //logout the user
+                      localStorage.removeItem("token");
+                    }}
+                  >
+                    Logout
+                  </Nav.Link>
+                </Nav>
+              )}
+            </Col>
+          </Row>
+        </Form>
+      </Container>
+    </Navbar>
+  );
 }
-
-export default NavBar;

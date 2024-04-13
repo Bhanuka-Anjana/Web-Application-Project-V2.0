@@ -1,25 +1,21 @@
-import http from "./httpService";
+import HTTP from "./httpService";
 
-const apiEndpoint = "http://localhost:8080/api/orders";
+const apiEndpoint = "/orders";
 
 export function getOrders() {
-  //return http.get(apiEndpoint + "/");
+  const response = HTTP.get(apiEndpoint);
+  return response;
 }
 
 export function getorder(orderId) {
-  return http.get(`${apiEndpoint}/${orderId}`);
+  return HTTP.get(`${apiEndpoint}/${orderId}`);
 }
 
-export function saveOrder(order) {
-  if (order._id) {
-    const body = { ...order };
-    delete body._id;
-    return http.put(`${apiEndpoint}/${order._id}`, body);
-  }
-
-  return http.post(apiEndpoint, order);
+export async function saveOrder(order) {
+  const response = await HTTP.post(apiEndpoint, order);
+  return response;
 }
 
 export function deleteOrder(orderId) {
-  return http.delete(`${apiEndpoint}/${orderId}`);
+  return HTTP.delete(`${apiEndpoint}/${orderId}`);
 }

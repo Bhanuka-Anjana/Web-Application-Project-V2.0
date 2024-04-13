@@ -1,5 +1,6 @@
-import http from "./httpService";
+import HTTP from "./httpService";
 
 export async function getCategories() {
-  return await http.get("http://localhost:8080/api/categories",{withCredentials:true});
+  const response = await HTTP.get("/categories");
+  return response;
 }

@@ -3,47 +3,26 @@ Joi.objectId = require("joi-objectid")(Joi);
 const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema({
-  user: {
-    type: new mongoose.Schema({
-      firstName: {
-        type: String,
-        required: true,
-        minlength: 5,
-        maxlength: 50,
-      },
-      contactNumber: {
-        type: String,
-        required: true,
-        minlength: 10,
-        maxlength: 50,
-      },
-    }),
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
     required: true,
   },
-  product: {
-    type: new mongoose.Schema({
-      productName: {
-        type: String,
+  //list of products and their quantities
+  products: [
+    {
+      productId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
         required: true,
-        trim: true,
-        minlength: 5,
-        maxlength: 255,
       },
-      unitPrice: {
+      quantity: {
         type: Number,
+        min: 1,
         required: true,
-        min: 0,
-        max: 1000,
       },
-    }),
-    required: true,
-  },
-  quantity: {
-    type: Number,
-    required: true,
-    min: 1,
-    max: 50,
-  },
+    },
+  ],
   createDate: {
     type: Date,
     required: true,
@@ -53,6 +32,11 @@ const orderSchema = new mongoose.Schema({
     type: Number,
     min: 0,
   },
+  status: {
+    type: String,
+    enum: ["Pending", "Confirmed", "Delivered"],
+    default: "Pending",
+  },
 });
 
 const Order = mongoose.model("Order", orderSchema);
@@ -60,8 +44,14 @@ const Order = mongoose.model("Order", orderSchema);
 function validateOrder(order) {
   const schema = Joi.object({
     userId: Joi.objectId().required(),
-    productId: Joi.objectId().required(),
-    quantity: Joi.number().positive().greater(0).required(),
+    products: Joi.array().items(
+      Joi.object({
+        productId: Joi.objectId().required(),
+        quantity: Joi.number().min(1).required(),
+      })
+    ),
+    totalCost: Joi.number().positive().greater(0),
+    status: Joi.string().valid("Pending", "Confirmed", "Delivered"),
   });
 
   return schema.validate(order);
