@@ -6,7 +6,6 @@ const app = express();
 require("dotenv").config();
 
 const products = require("./routes/products");
-const users = require("./routes/users");
 const orders = require("./routes/orders");
 const auth = require("./routes/auth");
 const categories = require("./routes/categories");
@@ -34,7 +33,6 @@ if (!process.env.JWT_SECRET_KEY) {
 
 //routes
 app.use("/api/products", products);
-app.use("/api/users", users);
 app.use("/api/categories", categories);
 app.use("/api/orders", orders);
 app.use("/api/auth", auth);
@@ -44,10 +42,11 @@ mongoose
   .then(() => {
     console.log("connected to the database");
   })
-  .catch(() => {
+  .catch((e) => {
     console.log("database not connected");
+    console.log(e);
   });
 
 app.listen(process.env.PORT, () => {
-  console.log("server is starting");
+  console.log("server is starting on " + process.env.PORT);
 });

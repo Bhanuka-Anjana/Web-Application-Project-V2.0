@@ -1,7 +1,6 @@
 const Joi = require("joi");
-Joi.objectId = require('joi-objectid')(Joi);
+Joi.objectId = require("joi-objectid")(Joi);
 const mongoose = require("mongoose");
-const { categorySchema } = require("./category");
 
 const productSchema = new mongoose.Schema({
   productName: {
@@ -22,9 +21,13 @@ const productSchema = new mongoose.Schema({
     min: 0,
     max: 1000,
   },
-  categoryId: { 
-    type: String,  
-    required: true
+  categoryId: {
+    type: String,
+    required: true,
+  },
+  imageUrl: {
+    type: String,
+    default: null,
   },
 });
 
@@ -36,6 +39,7 @@ const validateProduct = (product) => {
     numberInStock: Joi.number().min(0).required(),
     unitPrice: Joi.number().min(0).required(),
     categoryId: Joi.objectId().required(),
+    imageUrl: Joi.string().default(null),
   });
 
   return schema.validate(product);

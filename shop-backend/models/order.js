@@ -34,8 +34,24 @@ const orderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["Pending", "Confirmed", "Delivered"],
+    enum: ["Pending", "Confirmed", "Shipped"],
     default: "Pending",
+  },
+  // order pickup details
+  pickupDetails: {
+    address: {
+      type: String,
+      required: true,
+    },
+    contactNumber: {
+      type: String,
+      required: true,
+    },
+    deliveryMethod: {
+      type: String,
+      enum: ["Pickup", "Delivery"],
+      required: true,
+    },
   },
 });
 
@@ -51,7 +67,11 @@ function validateOrder(order) {
       })
     ),
     totalCost: Joi.number().positive().greater(0),
-    status: Joi.string().valid("Pending", "Confirmed", "Delivered"),
+    pickupDetails: Joi.object({
+      address: Joi.string().required(),
+      contactNumber: Joi.string().required(),
+      deliveryMethod: Joi.string().valid("Pickup", "Delivery").required(),
+    }),
   });
 
   return schema.validate(order);

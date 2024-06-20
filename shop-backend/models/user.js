@@ -24,12 +24,6 @@ const userSchema = new mongoose.Schema({
     maxlength: 255,
     unique: true,
   },
-  imgURL: {
-    type: String,
-    required: true,
-    minlength: 5,
-    maxlength: 1024,
-  },
   password: {
     type: String,
     minlength: 5,
@@ -39,10 +33,11 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  googleId: {
+  profilePicturePath: {
     type: String,
-    unique: true,
+    default: null,
   },
+  //TODO: once add the google login, add the googleId
 });
 
 userSchema.methods.getDetails = function () {
@@ -51,9 +46,8 @@ userSchema.methods.getDetails = function () {
     "firstName",
     "lastName",
     "email",
-    "imgURL",
     "isAdmin",
-    "googleId",
+    "profilePicturePath",
   ]);
 };
 
@@ -70,10 +64,9 @@ function validateUser(user) {
     firstName: Joi.string().min(2).max(50).required(),
     lastName: Joi.string().min(2).max(50),
     email: Joi.string().min(5).max(255).required().email(),
-    imgURL: Joi.string().min(5).max(1024),
     isAdmin: Joi.boolean().default(false),
     password: Joi.string().max(1024),
-    googleId: Joi.string().empty(""),
+    profilePicturePath: Joi.string().default(null),
   });
 
   return schema.validate(user);

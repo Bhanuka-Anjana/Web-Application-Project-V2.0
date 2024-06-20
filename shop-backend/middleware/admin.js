@@ -1,9 +1,13 @@
 function admin(req, res, next) {
   //403 - Forbidden
-  if (!req.user.isAdmin) {
-    return res.status(403);
+  try {
+    if (!req.user.isAdmin) {
+      return res.status(403);
+    }
+    next();
+  } catch (e) {
+    res.status(403).json({ message: "Invalid token" });
   }
-  next();
 }
 
 module.exports = admin;
