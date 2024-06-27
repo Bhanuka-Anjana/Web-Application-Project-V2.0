@@ -1,31 +1,77 @@
+import { toast } from "react-toastify";
 import HTTP from "./httpService";
 
+const baseURL = "products";
+
 export async function getProducts() {
-  return await HTTP.get("/products");
+  try {
+    const response = await HTTP.get(`${baseURL}/getall`);
+    if (response.status === 200) {
+      return response.data;
+    } else {
+      toast.error(response.data.message);
+      return null;
+    }
+  } catch (error) {
+    console.log(error);
+    toast.error(error.response.data.message);
+    return null;
+  }
 }
 
-export async function getProduct(productId) {
-  const response = await HTTP.get(`/products/?id=${productId}`);
-  return response;
-}
-
-export async function saveProduct(product) {
-  const response = await HTTP.post("/products", product);
-  return response;
+export async function createProduct(product) {
+  try {
+    const response = await HTTP.post(`${baseURL}/`, product, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    if (response.status === 201) {
+      toast.success(response.data.message);
+      return response.data?.response;
+    } else {
+      toast.error(response.data.message);
+      return null;
+    }
+  } catch (error) {
+    console.log(error);
+    toast.error(error.response.data.message);
+    return null;
+  }
 }
 
 export async function deleteProduct(productId) {
-  const response = await HTTP.delete(`/products/?id=${productId}`);
-  return response;
+  try {
+    const response = await HTTP.delete(`${baseURL}/${productId}`);
+    if (response.status === 200) {
+      toast.success(response.data.message);
+      return productId;
+    } else {
+      toast.error(response.data.message);
+      return null;
+    }
+  } catch (error) {
+    console.log(error);
+    toast.error(error.response.data.message);
+    return null;
+  }
 }
 
-export async function updateProduct(product) {
-  const body = {
-    productName: product.productName,
-    unitPrice: product.unitPrice,
-    numberInStock: product.numberInStock,
-    categoryId: product.categoryId,
-  };
-  const response = await HTTP.put(`/products/?id=${product._id}`, body);
-  return response;
+export async function updateProduct(id, product) {
+  try {
+    const response = await HTTP.put(`${baseURL}/${id}`, product, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    if (response) {
+      if (response.status === 200) {
+        toast.success(response.data.message);
+        return response.data.response;
+      } else {
+        toast.error(response.data.message);
+        return null;
+      }
+    }
+  } catch (error) {
+    console.log(error);
+    toast.error(error.response.data.message);
+    return null;
+  }
 }

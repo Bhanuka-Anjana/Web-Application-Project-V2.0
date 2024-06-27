@@ -1,0 +1,21 @@
+.product{
+    display: flex;
+    margin-top: 50px;
+}
+.product column{
+    width: 50%;
+}
+
+.product-form{
+    display: flex;
+    flex-direction: column;
+    margin-left: 100px;
+}
+
+/* center the image vertically */
+.product .column img{
+    margin: auto;
+    justify-content: center;
+    align-items: center;
+    margin-top: 100px;
+}

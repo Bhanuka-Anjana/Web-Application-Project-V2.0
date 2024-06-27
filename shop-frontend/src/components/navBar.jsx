@@ -1,5 +1,4 @@
-import React, { useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
@@ -8,25 +7,17 @@ import Button from "react-bootstrap/Button";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { fetchUserData } from "../features/authentication/authSlice";
 import Badge from "react-bootstrap/Badge";
-import { setSearchItem } from "../features/common/commonSlice";
+import { useEffect } from "react";
+import { logout } from "../features/authentication/authSlice";
 
 export default function NavBar() {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const isUserLoggedIn = useSelector((state) => state.auth.isAuthenticated);
-  const user = useSelector((state) => state.auth.data);
+  const dispatch = useDispatch();
+  const { isAuthenticated, data } = useSelector((state) => state.auth);
   const cart = useSelector((state) => state.cart.data);
 
-  //if token is available in the local storage, then the user is logged in
-  useEffect(() => {
-    if (localStorage.getItem("token")) {
-      //dispatch the fetchUserData action
-      dispatch(fetchUserData());
-    }
-  }, []);
+  useEffect(() => {}, [isAuthenticated, data, cart]);
 
   return (
     <Navbar bg="dark" sticky="top" data-bs-theme="dark">
@@ -38,15 +29,15 @@ export default function NavBar() {
         >
           Cafeteria
         </Navbar.Brand>
-        {isUserLoggedIn && (
-          <Nav>
-            <Nav.Link
-              onClick={() => {
-                navigate("/products");
-              }}
-            >
-              Products
-            </Nav.Link>
+        <Nav>
+          <Nav.Link
+            onClick={() => {
+              navigate("/products");
+            }}
+          >
+            Products
+          </Nav.Link>
+          {isAuthenticated && (
             <Nav.Link
               onClick={() => {
                 navigate("/orders");
@@ -54,56 +45,49 @@ export default function NavBar() {
             >
               Orders
             </Nav.Link>
-            {user.isAdmin && (
-              <Nav>
-                <Nav.Link
-                  onClick={() => {
-                    navigate("/categories");
-                  }}
-                >
-                  Categories
-                </Nav.Link>
-                <Nav.Link
-                  onClick={() => {
-                    navigate("/users");
-                  }}
-                >
-                  Users
-                </Nav.Link>
-              </Nav>
-            )}
-          </Nav>
-        )}
+          )}
+          {data?.isAdmin && (
+            <Nav>
+              <Nav.Link
+                onClick={() => {
+                  navigate("/categories");
+                }}
+              >
+                Categories
+              </Nav.Link>
+              <Nav.Link
+                onClick={() => {
+                  navigate("/users");
+                }}
+              >
+                Users
+              </Nav.Link>
+            </Nav>
+          )}
+        </Nav>
+
         <Form inline>
           <Row>
             <Col xs="auto">
-              <Form.Control
-                type="text"
-                placeholder="Search"
-                className=" mr-sm-2"
-                onChange={(e) => {
-                  dispatch(setSearchItem(e.target.value));
-                }}
-              />
-            </Col>
-            <Col xs="auto">
-              <Button
-                variant="primary"
-                onClick={() => {
-                  navigate("/cart");
-                }}
-              >
-                Cart <Badge bg="secondary">{cart.length}</Badge>
-              </Button>
+              {isAuthenticated && !data.isAdmin && (
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    navigate("/cart");
+                  }}
+                >
+                  Cart <Badge bg="secondary">{cart.length}</Badge>
+                </Button>
+              )}
             </Col>
             <Col className="mx-5" xs="auto">
-              {isUserLoggedIn ? (
+              {isAuthenticated ? (
                 <Navbar.Text
                   onClick={() => {
                     navigate("/profile");
                   }}
                 >
-                  Signed in as: <a>{user.firstName}</a>
+                  Signed in as: <a>{data?.firstName}</a>
                 </Navbar.Text>
               ) : (
                 <Nav>
@@ -125,13 +109,14 @@ export default function NavBar() {
               )}
             </Col>
             <Col xs="auto">
-              {isUserLoggedIn && (
+              {isAuthenticated && (
                 <Nav>
                   <Nav.Link
                     href="/"
                     onClick={() => {
                       //logout the user
                       localStorage.removeItem("token");
+                      dispatch(logout());
                     }}
                   >
                     Logout

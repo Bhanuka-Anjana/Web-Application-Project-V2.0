@@ -1,115 +1,124 @@
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import { useSelector, useDispatch } from "react-redux";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { updateUser } from "../../services/userService";
 import Spinner from "react-bootstrap/Spinner";
-import { fetchUserData } from "./authSlice";
+import { updateUser } from "./authSlice";
+import { Alert } from "react-bootstrap";
+import profile from "../../assets/default/user.png";
 
 export default function Profile() {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.auth.data);
-  const [firstName, setFirstName] = useState(user.firstName);
-  const [lastName, setLastName] = useState(user.lastName);
-  const [email, setEmail] = useState(user.email);
+  const { loading, data } = useSelector((state) => state.auth);
+  const [firstName, setFirstName] = useState();
+  const [lastName, setLastName] = useState();
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [isDisabled, setDisabled] = useState(true);
+  const [file, setFile] = useState(null);
+
+  // TODO: configure the file  upload
+
+  useEffect(() => {
+    if (data) {
+      setFirstName(data.firstName);
+      setLastName(data.lastName);
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     // check if any field is empty
-    if (!firstName || !lastName || !email) {
+    if (!firstName || !lastName) {
       setError("All fields are required");
       return;
     }
 
     // chack the updated values are same as the old values
-    if (
-      firstName === user.firstName &&
-      lastName === user.lastName &&
-      email === user.email
-    ) {
+    if (firstName === data.firstName && lastName === data.lastName && !file) {
       setError("No changes made");
       return;
     }
+    // TODO: unable to update profile
 
     // Update the user data
-    setLoading(true);
     setError(null);
     try {
-      const response = await updateUser(user._id, {
-        firstName,
-        lastName,
-        email,
-      });
-      setLoading(false);
-      if (response.status === 200) {
-        toast.success("User updated successfully");
-
-        // update the user data in redux store
-        dispatch(fetchUserData());
-
-        setDisabled(true);
-      } else {
-        setError(response.data.message);
+      const response = await dispatch(
+        updateUser({ id: data._id, data: { firstName, lastName, file } })
+      ).unwrap();
+      if (response) {
+        setFirstName(response.firstName);
+        setLastName(response.lastName);
       }
     } catch (error) {
-      setError(error.message);
-      setLoading(false);
+      toast.error("Unable to update profile");
     }
   };
-  if (error) {
-    toast.error(error);
-  }
+
   return (
-    <Form onSubmit={handleSubmit}>
-      <Form.Group className="mb-3 mt-5">
-        <Form.Label>First Name</Form.Label>
-        <Form.Control
-          type="text"
-          value={firstName}
-          onChange={(e) => {
-            setFirstName(e.target.value);
-            setDisabled(false);
+    <div className="container mt-5">
+      <h1>Profile</h1>
+      <hr />
+      {data?.profilePicturePath ? (
+        <img
+          src={data.profilePicturePath}
+          alt="profile"
+          className="rounded-circle"
+          style={{
+            width: "150px",
+            height: "150px",
           }}
         />
-      </Form.Group>
-      <Form.Group className="mb-3">
-        <Form.Label>Last Name</Form.Label>
-        <Form.Control
-          type="text"
-          value={lastName}
-          onChange={(e) => {
-            setLastName(e.target.value);
-            setDisabled(false);
-          }}
-        />
-      </Form.Group>
+      ) : (
+        <img src={profile} alt="profile" className="rounded-circle" />
+      )}
+      <Form onSubmit={handleSubmit} className="mt-4">
+        <Alert variant="danger" show={error}>
+          {error}
+        </Alert>
+        <Form.Group className="mb-3 mt-5">
+          <Form.Label>First Name</Form.Label>
+          <Form.Control
+            type="text"
+            value={firstName}
+            onChange={(e) => {
+              setFirstName(e.target.value);
+            }}
+          />
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Last Name</Form.Label>
+          <Form.Control
+            type="text"
+            value={lastName}
+            onChange={(e) => {
+              setLastName(e.target.value);
+            }}
+          />
+        </Form.Group>
 
-      <Form.Group className="mb-3">
-        <Form.Label>Email</Form.Label>
-        <Form.Control
-          type="email"
-          value={email}
-          onChange={(e) => {
-            setEmail(e.target.value);
-            setDisabled(false);
-          }}
-        />
-      </Form.Group>
-      <Form.Group className="position-relative mb-3">
-        <Form.Label>Profile Picture</Form.Label>
-        <Form.Control type="file" required name="file" />
-      </Form.Group>
+        <Form.Group className="position-relative mb-3">
+          <Form.Label>Profile Picture</Form.Label>
+          <Form.Control
+            type="file"
+            name="file"
+            onChange={(e) => {
+              setFile(e.target.files[0]);
+            }}
+          />
+        </Form.Group>
 
-      <Button variant="primary" type="submit" disabled={isDisabled}>
-        Update
-      </Button>
-
-      {loading && <Spinner animation="border" role="status" />}
-    </Form>
+        {loading ? (
+          <Button variant="success" disabled={true}>
+            Updating... <Spinner animation="grow" size="sm" />
+          </Button>
+        ) : (
+          <Button variant="primary" type="submit">
+            Update
+          </Button>
+        )}
+      </Form>
+    </div>
   );
 }

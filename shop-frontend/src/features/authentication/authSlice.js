@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { getCurrentUser } from "../../services/authService";
+import { getCurrentUser, login, register, updateProfile } from "../../services/authService";
 
 // Define the initial state for the user slice
 const initialState = {
@@ -11,10 +11,66 @@ const initialState = {
 
 // Define the async thunk for fetching user data
 export const fetchUserData = createAsyncThunk(
-  "user/fetchUserData",
-  async () => {
-    const response = await getCurrentUser();
-    return response;
+  "user/fetchCurrentUserData",
+  async (data, thunkAPI) => {
+    try {
+      const response = await getCurrentUser();
+      if (response) {
+        return response;
+      } else {
+        return thunkAPI.rejectWithValue("Unable to fetch user data");
+      }
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const loginUser = createAsyncThunk(
+  "user/login",
+  async (data, thunkAPI) => {
+    try {
+      const response = await login(data.email, data.password);
+      if (response) {
+        return true;
+      } else {
+        return thunkAPI.rejectWithValue("Unable to login");
+      }
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const registerUser = createAsyncThunk(
+  "user/register",
+  async (data, thunkAPI) => {
+    try {
+      const response = await register(data);
+      if (response) {
+        return true;
+      } else {
+        return thunkAPI.rejectWithValue("Unable to register");
+      }
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const updateUser = createAsyncThunk(
+  "user/update",
+  async (data, thunkAPI) => {
+    try {
+      const response = await updateProfile(data.id, data.data);
+      if (response) {
+        return response;
+      } else {
+        return thunkAPI.rejectWithValue("Unable to update profile");
+      }
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
   }
 );
 
@@ -27,12 +83,7 @@ export const authSlice = createSlice({
     logout: (state) => {
       state.data = null;
       state.isAuthenticated = false;
-    },
-
-    // Define the reducer for setting the user data
-    setUserData: (state, action) => {
-      state.data = action.payload;
-      state.isAuthenticated = true;
+      state.error= null;
     },
   },
   extraReducers: (builder) => {
@@ -48,11 +99,43 @@ export const authSlice = createSlice({
       .addCase(fetchUserData.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
+      })
+      .addCase(loginUser.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(loginUser.fulfilled, (state, action) => {
+        state.loading = false;
+      })
+      .addCase(loginUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      })
+      .addCase(registerUser.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(registerUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.isAuthenticated = true;
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      })
+      .addCase(updateUser.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(updateUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.data = action.payload;
+      })
+      .addCase(updateUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
       });
   },
 });
 
 // Export the actions
-export const { logout, setUserData } = authSlice.actions;
+export const { logout } = authSlice.actions;
 
 export default authSlice.reducer;

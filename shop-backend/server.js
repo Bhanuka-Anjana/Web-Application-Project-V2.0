@@ -14,7 +14,7 @@ const categories = require("./routes/categories");
 app.use(
   cors({
     // allow to server to accept request from different origin
-    origin: "http://localhost:3000",
+    origin: process.env.CLIENT_URL,
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     // allow session cookie from browser to pass through
     credentials: true,

@@ -1,21 +1,16 @@
 import React, { useState } from "react";
-import GoogleButton from "react-google-button";
 import { Link, useNavigate } from "react-router-dom";
 import loginBg from "../../images/traditional-food-feat.jpg";
 import shoplabel from "../../images/shop-label.png";
-import { login } from "../../services/authService";
 import { useDispatch } from "react-redux";
-import { setUserData } from "./authSlice";
+import { fetchUserData, loginUser } from "./authSlice";
 
 export default function LoginForm() {
   const dispatch = useDispatch();
-
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
@@ -25,40 +20,25 @@ export default function LoginForm() {
     setPassword(e.target.value);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
-    login(email, password)
-      .then((response) => {
-        setLoading(false);
-
-        //set the user data in the redux store
-        dispatch(setUserData(response));
-
-        // Redirect to the products page
-        navigate("/");
-      })
-      .catch((err) => {
-        console.log("error", err);
-        setLoading(false);
-        setError(err);
-      });
+    try {
+      const response = await dispatch(loginUser({ email, password })).unwrap();
+      if (response) {
+        const loginUser = await dispatch(fetchUserData()).unwrap();
+        if (loginUser) {
+          navigate("/");
+        }
+      }
+    } catch (error) {}
   };
 
   const handleGoogleLogin = () => {
     console.log("Google Login");
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
   return (
-    <div className="container-fluid g-0">
+    <div>
       <div className="row g-0">
         <div className="col-7 vh-100 thumbnail text-center">
           <img
@@ -72,16 +52,9 @@ export default function LoginForm() {
           <img src={shoplabel} className="shop-label" alt="" height="100%" />
         </div>
         <div className="col-5 text-center">
-          <h1 className="mt-5 mb-5">Login</h1>
-          <div className="d-flex justify-content-center">
-            <GoogleButton onClick={handleGoogleLogin} />
-          </div>
-
-          <div class="divider d-flex justify-content-center mt-5">
-            <hr width="200px" />
-            <p className=" fw-bold mx-3 mb-0 text-muted">OR</p>
-            <hr width="200px" />
-          </div>
+          <h1 className="mt-5 mb-5">
+            Login
+          </h1>
           <form className="px-4 ml-4" onSubmit={handleSubmit}>
             <div class="form-group">
               <label for="exampleInputEmail1">Email address</label>

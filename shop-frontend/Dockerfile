@@ -1,4 +1,5 @@
-FROM node:latest
+# Stage 1: Build the React app
+FROM node:lts
 
 # Create app directory
 WORKDIR /app
@@ -10,6 +11,9 @@ RUN npm install
 # Bundle app source
 COPY . .
 
-EXPOSE 8080
+# Expose the port the app runs on
+EXPOSE 3000
 
-CMD [ "npm", "start" ]
+# Serve the app
+CMD ["npm", "run", "dev"]
+

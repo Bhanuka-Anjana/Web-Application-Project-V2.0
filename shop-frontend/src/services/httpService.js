@@ -1,7 +1,9 @@
 import axios from "axios";
 
+const base_url = import.meta.env.VITE_API_SERVER_URL || "http://localhost:5000";
+
 const HTTP = axios.create({
-  baseURL: "http://localhost:8080/api",
+  baseURL: base_url,
   withCredentials: true,
   headers: {
     "Content-type": "application/json",
@@ -9,10 +11,11 @@ const HTTP = axios.create({
   timeout: 5000,
 });
 
+// Add a request interceptor
 HTTP.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
-    config.headers.Authorization = token;
+    config.headers.Authorization = `Breaer ${token}`;
   }
   return config;
 });

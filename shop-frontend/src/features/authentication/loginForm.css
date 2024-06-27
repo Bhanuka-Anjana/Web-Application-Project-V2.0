@@ -1,0 +1,7 @@
+.container-login {
+  display: flex;
+}
+
+.column {
+    width: 50%;
+}
