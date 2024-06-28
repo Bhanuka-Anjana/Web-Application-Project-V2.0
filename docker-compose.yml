@@ -20,7 +20,7 @@ services:
       - "27017:27017"
 
     environment:
-      - PORT=8080
+      - PORT=8081
       - CLIENT_URL=http://localhost:3000
       - AWS_BUCKET_NAME=devops-static-resources
       - AWS_REGION=us-east-1
