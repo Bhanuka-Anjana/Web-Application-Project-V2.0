@@ -7,7 +7,7 @@ services:
     ports:
       - "3001:3000"
     environment:
-      - VITE_API_SERVER_URL=http://localhost:8080/api
+      - VITE_API_SERVER_URL=http://localhost:8085/api
     depends_on:
       - backend
 
@@ -20,7 +20,7 @@ services:
       - "27017:27017"
 
     environment:
-      - PORT=8080
+      - PORT=8085
       - CLIENT_URL=http://localhost:3000
       - AWS_BUCKET_NAME=devops-static-resources
       - AWS_REGION=us-east-1
