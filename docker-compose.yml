@@ -1,0 +1,29 @@
+version: "3.8"
+services:
+  frontend:
+    image: lahirumadhuwantha/frontend-image:latest
+    build:
+      context: ./shop-frontend
+      dockerfile: ./Dockerfile
+    ports:
+      - '3000:3000'
+    environment:
+      - VITE_API_SERVER_URL=http://localhost:8080/api
+    depends_on:
+      - backend
+
+
+  backend:
+    image: lahirumadhuwantha/backend-image:latest
+    build:
+      context: ./shop-backend
+      dockerfile: ./Dockerfile
+    ports:
+      - '8080:8080'
+      - '27017:27017'
+
+    environment:
+      - PORT=8080
+      - CLIENT_URL=http://localhost:3000
+      - AWS_BUCKET_NAME=devops-static-resources
+      - AWS_REGION=us-east-1
