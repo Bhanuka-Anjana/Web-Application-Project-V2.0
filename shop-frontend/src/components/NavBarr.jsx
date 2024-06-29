@@ -27,7 +27,7 @@ export default function NavBarr() {
             navigate("/");
           }}
         >
-          Cafeteria
+          feteria
         </Navbar.Brand>
         <Nav>
           <Nav.Link
