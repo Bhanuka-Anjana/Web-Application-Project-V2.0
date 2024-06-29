@@ -10,7 +10,7 @@ import UserDetails from "./../features/users/UserDetails";
 import CartList from "./../features/cart/CartList";
 import LoginForm from "./../features/authentication/loginForm";
 import RegistrationForm from "./../features/authentication/registrationForm";
-import NavBar from "../components/NavBar";
+import NavBar from "../components/NavBarr";
 import Unauthorized from "./../components/unauthorized/unauthorized";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUserData } from "../features/authentication/authSlice";

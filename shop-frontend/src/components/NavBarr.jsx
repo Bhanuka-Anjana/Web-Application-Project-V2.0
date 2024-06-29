@@ -11,7 +11,7 @@ import Badge from "react-bootstrap/Badge";
 import { useEffect } from "react";
 import { logout } from "../features/authentication/authSlice";
 
-export default function NavBar() {
+export default function NavBarr() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { isAuthenticated, data } = useSelector((state) => state.auth);
