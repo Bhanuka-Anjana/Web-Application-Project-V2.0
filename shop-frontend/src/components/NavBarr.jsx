@@ -27,7 +27,7 @@ export default function NavBarr() {
             navigate("/");
           }}
         >
-          feteria
+          defeteria
         </Navbar.Brand>
         <Nav>
           <Nav.Link
